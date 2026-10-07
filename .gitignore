@@ -1,7 +1,15 @@
-node_modules
+node_modules/
+.env
+.env.*
+!.env.example
 
-# Added for deployment
-*.pem
+npm-debug.log*
+Dockerfile.local
+
 terraform/.terraform/
 terraform/*.tfstate
-terraform/*.tfstate.backup
+terraform/*.tfstate.*
+terraform/.terraform.lock.hcl
+
+.vscode/
+.DS_Store
