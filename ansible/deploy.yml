@@ -1,0 +1,91 @@
+---
+- name: Deploy FocusFlow Pomodoro app
+  hosts: web
+  become: true
+
+  tasks:
+    - name: Update apt cache
+      apt:
+        update_cache: yes
+
+    - name: Install prerequisite packages
+      apt:
+        name:
+          - ca-certificates
+          - curl
+          - gnupg
+        state: present
+
+    - name: Add Docker's official GPG key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Add Docker repository
+      apt_repository:
+        repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
+        state: present
+
+    - name: Install Docker Engine and Compose plugin
+      apt:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-compose-plugin
+        state: present
+        update_cache: yes
+
+    - name: Add ubuntu user to docker group
+      user:
+        name: ubuntu
+        groups: docker
+        append: yes
+
+    - name: Ensure app directory exists
+      file:
+        path: /home/ubuntu/focusflow-pomodoro
+        state: directory
+        owner: ubuntu
+        group: ubuntu
+
+    - name: Copy project files to server
+      synchronize:
+        src: ../../focusflow-pomodoro/
+        dest: /home/ubuntu/focusflow-pomodoro/
+        rsync_opts:
+          - "--exclude=node_modules"
+          - "--exclude=.git"
+
+    - name: Copy docker-compose.yml
+      copy:
+        src: ../docker-compose.yml
+        dest: /home/ubuntu/focusflow-pomodoro/docker-compose.yml
+        owner: ubuntu
+        group: ubuntu
+
+    - name: Copy backend Dockerfile
+      copy:
+        src: ../backend/Dockerfile
+        dest: /home/ubuntu/focusflow-pomodoro/backend/Dockerfile
+        owner: ubuntu
+        group: ubuntu
+
+    - name: Copy frontend Dockerfile
+      copy:
+        src: ../frontend/Dockerfile
+        dest: /home/ubuntu/focusflow-pomodoro/frontend/Dockerfile
+        owner: ubuntu
+        group: ubuntu
+
+    - name: Copy frontend nginx.conf
+      copy:
+        src: ../frontend/nginx.conf
+        dest: /home/ubuntu/focusflow-pomodoro/frontend/nginx.conf
+        owner: ubuntu
+        group: ubuntu
+
+    - name: Build and start containers
+      shell: docker compose up -d --build
+      args:
+        chdir: /home/ubuntu/focusflow-pomodoro

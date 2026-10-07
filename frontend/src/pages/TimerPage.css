@@ -1,0 +1,241 @@
+.timer-page { animation: fadeIn 0.5s ease-out; }
+
+.timer-layout {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 2rem;
+    align-items: start;
+}
+
+.timer-main {
+    text-align: center;
+}
+
+.sound-toggle {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #94a3b8;
+    padding: 8px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.sound-toggle:hover {
+    color: #f8fafc;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.mode-selector {
+    display: flex;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-bottom: 2rem;
+}
+
+.mode-btn {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #94a3b8;
+    padding: 8px 18px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+.mode-btn.active {
+    background: rgba(255, 255, 255, 0.08);
+    color: #f8fafc;
+    border-color: #a855f7;
+}
+
+.timer-circle-wrapper {
+    position: relative;
+    width: 320px;
+    height: 320px;
+    margin: 0 auto 2rem;
+}
+
+.timer-svg {
+    width: 100%;
+    height: 100%;
+}
+
+.progress-ring {
+    transition: stroke-dashoffset 0.5s ease;
+}
+
+.timer-display {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+}
+
+.timer-time {
+    font-size: 4.5rem;
+    font-weight: 300;
+    letter-spacing: -2px;
+    display: block;
+}
+
+.timer-mode-label {
+    color: #94a3b8;
+    font-size: 0.95rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.timer-controls {
+    display: flex;
+    justify-content: center;
+    gap: 1.25rem;
+    margin-bottom: 1.5rem;
+}
+
+.control-btn {
+    background: rgba(255, 255, 255, 0.05);
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #f8fafc;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.control-btn.primary {
+    background: linear-gradient(135deg, #8b5cf6, #ec4899);
+    border: none;
+    width: 68px;
+    height: 68px;
+    box-shadow: 0 8px 24px rgba(139, 92, 246, 0.4);
+}
+
+.control-btn:hover {
+    transform: translateY(-3px);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.control-btn.primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 28px rgba(236, 72, 153, 0.5);
+}
+
+.session-dots {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.session-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.15);
+    transition: all 0.3s;
+}
+
+.session-dot.filled {
+    background: #a855f7;
+    border-color: #a855f7;
+    box-shadow: 0 0 10px rgba(168, 85, 247, 0.5);
+}
+
+/* Sidebar */
+.timer-sidebar {
+    background: rgba(30, 41, 59, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 16px;
+    padding: 1.5rem;
+}
+
+.timer-sidebar h3 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 1rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #e2e8f0;
+}
+
+.timer-task-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.timer-task-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.15);
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid transparent;
+}
+
+.timer-task-item:hover {
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.timer-task-item.selected {
+    background: rgba(168, 85, 247, 0.1);
+    border-color: rgba(168, 85, 247, 0.3);
+}
+
+.timer-task-radio {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 2px solid #64748b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.timer-task-item.selected .timer-task-radio {
+    background: #a855f7;
+    border-color: #a855f7;
+    color: white;
+}
+
+.timer-task-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.timer-task-info span {
+    font-size: 0.9rem;
+}
+
+.timer-task-info small {
+    color: #64748b;
+    font-size: 0.78rem;
+}
+
+@media (max-width: 768px) {
+    .timer-layout {
+        grid-template-columns: 1fr;
+    }
+    .timer-circle-wrapper {
+        width: 260px;
+        height: 260px;
+    }
+    .timer-time { font-size: 3.5rem; }
+}

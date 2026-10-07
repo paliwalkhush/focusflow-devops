@@ -1,0 +1,65 @@
+:root {
+    --primary: #ff6b6b;
+    --bg: #f7f9fc;
+}
+
+body {
+    background: var(--bg);
+    font-family: 'Inter', sans-serif;
+}
+
+.app-container {
+    max-width: 500px;
+    margin: 50px auto;
+    text-align: center;
+}
+
+.timer-card {
+    background: white;
+    padding: 2rem;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    margin-bottom: 2rem;
+}
+
+.display {
+    font-size: 5rem;
+    color: var(--primary);
+    margin: 0;
+}
+
+.timer-controls button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #555;
+    margin: 0 10px;
+    transition: 0.3s;
+}
+
+.timer-controls button:hover {
+    color: var(--primary);
+}
+
+.input-group {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.input-group input {
+    flex: 1;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+}
+
+.task-item {
+    background: white;
+    display: flex;
+    justify-content: space-between;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
+}

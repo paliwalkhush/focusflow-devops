@@ -1,0 +1,41 @@
+version: "3.8"
+
+services:
+  mongo:
+    image: mongo:6.0.26
+    container_name: focusflow-mongo
+    restart: unless-stopped
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - focusflow-net
+
+  backend:
+    build: ./backend
+    container_name: focusflow-backend
+    restart: unless-stopped
+    environment:
+      - PORT=5000
+      - MONGO_URI=mongodb://mongo:27017/focusflow
+    depends_on:
+      - mongo
+    networks:
+      - focusflow-net
+
+  frontend:
+    build: ./frontend
+    container_name: focusflow-frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - focusflow-net
+
+networks:
+  focusflow-net:
+    driver: bridge
+
+volumes:
+  mongo_data:
