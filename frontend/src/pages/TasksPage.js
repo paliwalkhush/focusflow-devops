@@ -3,7 +3,7 @@ import axios from 'axios';
 import { Plus, Trash2, Check, Clock, Filter, Search, Edit3, X, Save } from 'lucide-react';
 import './TasksPage.css';
 
-const API = 'http://localhost:5000/api/tasks';
+const API = '/api/tasks';
 const CATEGORIES = ['General', 'Work', 'Study', 'Personal', 'Health', 'Other'];
 
 function TasksPage() {
