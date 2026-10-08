@@ -4,11 +4,20 @@ pipeline {
     environment {
         PROJECT_ID = 'focus-flow-508619'
         REGION = 'us-central1'
+        CLUSTER = 'focusflow-cluster'
+
         REGISTRY = 'us-central1-docker.pkg.dev'
         REPOSITORY = 'focusflow'
 
         BACKEND_IMAGE = "${REGISTRY}/${PROJECT_ID}/${REPOSITORY}/focusflow-backend"
         FRONTEND_IMAGE = "${REGISTRY}/${PROJECT_ID}/${REPOSITORY}/focusflow-frontend"
+
+        NAMESPACE = 'focusflow'
+        HELM_CHART = './helm/focusflow-helm'
+
+        KUBECTL = '/usr/bin/kubectl'
+        HELM = '/usr/local/bin/helm'
+        GCLOUD = '/snap/bin/gcloud'
     }
 
     stages {
@@ -45,10 +54,7 @@ pipeline {
                 echo 'Pushing Docker images to Google Artifact Registry...'
 
                 sh '''
-                    TOKEN=$(curl --noproxy "*" -s \
-                    -H "Metadata-Flavor: Google" \
-                    "http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token" |
-                    python3 -c "import sys,json; print(json.load(sys.stdin)[\\"access_token\\"])")
+                    TOKEN=$(${GCLOUD} auth print-access-token)
 
                     echo "$TOKEN" | docker login \
                     -u oauth2accesstoken \
@@ -61,23 +67,85 @@ pipeline {
             }
         }
 
-        stage('Docker Verify') {
+        stage('Configure GKE Access') {
             steps {
-                echo 'Verifying Docker images...'
+                echo 'Configuring kubectl access to GKE...'
 
-                sh 'docker images ${BACKEND_IMAGE}'
-                sh 'docker images ${FRONTEND_IMAGE}'
+                sh '''
+                    mkdir -p "$WORKSPACE/.kube"
+
+                    export KUBECONFIG="$WORKSPACE/.kube/config"
+
+                    ${GCLOUD} container clusters get-credentials ${CLUSTER} \
+                    --region ${REGION} \
+                    --project ${PROJECT_ID}
+
+                    ${KUBECTL} get nodes
+                '''
+            }
+        }
+
+        stage('Helm Deploy') {
+            steps {
+                echo 'Deploying FocusFlow to GKE using Helm...'
+
+                sh '''
+                    export KUBECONFIG="$WORKSPACE/.kube/config"
+
+                    ${HELM} upgrade --install focusflow ${HELM_CHART} \
+                    --namespace ${NAMESPACE} \
+                    --create-namespace \
+                    --wait \
+                    --timeout 10m
+                '''
+            }
+        }
+
+        stage('Helm Test') {
+            steps {
+                echo 'Running Helm tests...'
+
+                sh '''
+                    export KUBECONFIG="$WORKSPACE/.kube/config"
+
+                    ${HELM} test focusflow \
+                    --namespace ${NAMESPACE} \
+                    --logs
+                '''
+            }
+        }
+
+        stage('Verify Deployment') {
+            steps {
+                echo 'Verifying FocusFlow deployment...'
+
+                sh '''
+                    export KUBECONFIG="$WORKSPACE/.kube/config"
+
+                    ${KUBECTL} get deployments -n ${NAMESPACE}
+
+                    ${KUBECTL} get pods -n ${NAMESPACE}
+
+                    ${KUBECTL} get services -n ${NAMESPACE}
+                '''
             }
         }
     }
 
     post {
         success {
-            echo 'FocusFlow CI/CD image pipeline completed successfully!'
+            echo '=============================================='
+            echo 'FocusFlow CI/CD pipeline completed successfully!'
+            echo 'Docker images pushed to Artifact Registry.'
+            echo 'Application deployed to GKE using Helm.'
+            echo '=============================================='
         }
 
         failure {
-            echo 'FocusFlow pipeline failed. Check the Jenkins console output.'
+            echo '=============================================='
+            echo 'FocusFlow CI/CD pipeline FAILED.'
+            echo 'Check the Jenkins console output.'
+            echo '=============================================='
         }
     }
 }
