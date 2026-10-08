@@ -63,7 +63,7 @@ pipeline {
 
         stage('Docker Verify') {
             steps {
-                echo 'Verifying pushed Docker images...'
+                echo 'Verifying Docker images...'
 
                 sh 'docker images ${BACKEND_IMAGE}'
                 sh 'docker images ${FRONTEND_IMAGE}'
