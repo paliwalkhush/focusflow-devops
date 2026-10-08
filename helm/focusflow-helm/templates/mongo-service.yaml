@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongo
+  namespace: focusflow
+spec:
+  type: ClusterIP
+  selector:
+    app: mongo
+  ports:
+    - protocol: TCP
+      port: {{ .Values.mongo.service.port }}
+      targetPort: 27017

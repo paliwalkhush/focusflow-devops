@@ -1,0 +1,71 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: focusflow-sre-alerts
+  namespace: monitoring
+  labels:
+    release: monitoring
+spec:
+  groups:
+    - name: focusflow-sre
+      rules:
+
+        - alert: FocusFlowHighErrorRate
+          expr: |
+            (
+              sum(rate(focusflow_http_requests_total{status_code=~"5.."}[5m]))
+              /
+              sum(rate(focusflow_http_requests_total[5m]))
+            ) > 0.01
+          for: 5m
+          labels:
+            severity: warning
+            service: focusflow-backend
+          annotations:
+            summary: "FocusFlow error rate is above 1%"
+            description: "The FocusFlow backend has more than 1% HTTP 5xx errors for 5 minutes."
+
+        - alert: FocusFlowLowAvailability
+          expr: |
+            (
+              1 -
+              (
+                sum(rate(focusflow_http_requests_total{status_code=~"5.."}[5m]))
+                /
+                sum(rate(focusflow_http_requests_total[5m]))
+              )
+            ) < 0.99
+          for: 5m
+          labels:
+            severity: critical
+            service: focusflow-backend
+          annotations:
+            summary: "FocusFlow availability is below 99%"
+            description: "FocusFlow backend availability has remained below the 99% SLO for 5 minutes."
+
+        - alert: FocusFlowBackendDown
+          expr: |
+            up{job="focusflow-backend"} == 0
+          for: 2m
+          labels:
+            severity: critical
+            service: focusflow-backend
+          annotations:
+            summary: "FocusFlow backend is down"
+            description: "Prometheus cannot scrape the FocusFlow backend metrics endpoint."
+
+        - alert: FocusFlowHighLatency
+          expr: |
+            histogram_quantile(
+              0.95,
+              sum(
+                rate(focusflow_http_request_duration_seconds_bucket[5m])
+              ) by (le)
+            ) > 2
+          for: 5m
+          labels:
+            severity: warning
+            service: focusflow-backend
+          annotations:
+            summary: "FocusFlow P95 latency is high"
+            description: "FocusFlow backend P95 HTTP latency has exceeded 2 seconds for 5 minutes."

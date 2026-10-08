@@ -1,0 +1,18 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: focusflow-backend
+  namespace: monitoring
+  labels:
+    release: monitoring
+spec:
+  selector:
+    matchLabels:
+      app: focusflow-backend
+  namespaceSelector:
+    matchNames:
+      - focusflow
+  endpoints:
+    - port: http
+      path: /metrics
+      interval: 15s
