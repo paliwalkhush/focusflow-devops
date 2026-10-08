@@ -101,19 +101,18 @@ pipeline {
             }
         }
 
-        stage('Helm Test') {
-            steps {
-                echo 'Running Helm tests...'
+      stage('Helm Test') {
+    steps {
+        echo 'Running Helm tests...'
 
-                sh '''
-                    export KUBECONFIG="$WORKSPACE/.kube/config"
+        sh '''
+            export KUBECONFIG="$WORKSPACE/.kube/config"
 
-                    ${HELM} test focusflow \
-                    --namespace ${NAMESPACE} \
-                    --logs
-                '''
-            }
-        }
+            ${HELM} test focusflow \
+            --namespace ${NAMESPACE}
+        '''
+    }
+}
 
         stage('Verify Deployment') {
             steps {
