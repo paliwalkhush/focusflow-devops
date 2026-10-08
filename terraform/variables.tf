@@ -1,23 +1,23 @@
-variable "aws_region" {
-  description = "AWS region to deploy in"
+variable "gcp_project_id" {
+  description = "Google Cloud project ID"
   type        = string
-  default     = "ap-south-1" # Mumbai; change if you want a different region
+  default     = "focus-flow-508619"
 }
 
-variable "ami_id" {
-  description = "Ubuntu 22.04 LTS AMI ID for the chosen region (check AWS Console -> AMI Catalog for the current one)"
+variable "gcp_region" {
+  description = "Google Cloud region"
   type        = string
-  default     = "ami-0f5ee92e2d63afc18" # Ubuntu 22.04 LTS, ap-south-1 (verify before apply)
+  default     = "us-central1"
 }
 
-variable "instance_type" {
-  description = "EC2 instance size"
+variable "gcp_zone" {
+  description = "Google Cloud zone"
   type        = string
-  default     = "t2.micro" # free-tier eligible; t2.small if you need more headroom for docker builds
+  default     = "us-central1-a"
 }
 
-variable "key_name" {
-  description = "Name of the AWS key pair you created (e.g. focusflow-key)"
+variable "gke_cluster_name" {
+  description = "GKE Autopilot cluster name"
   type        = string
-  default     = "focusflow-key"
+  default     = "focusflow-cluster"
 }

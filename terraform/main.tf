@@ -1,66 +1,40 @@
 terraform {
   required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "~> 5.0"
+    google = {
+      source  = "hashicorp/google"
+      version = "~> 7.0"
     }
   }
+
+  required_version = ">= 1.6.0"
 }
 
-provider "aws" {
-  region = var.aws_region
+provider "google" {
+  project = var.gcp_project_id
+  region  = var.gcp_region
+  zone    = var.gcp_zone
 }
 
-# Security group: SSH (22) for Ansible, HTTP (80) for the app (nginx serves the
-# React build and reverse-proxies /api to the backend container)
-resource "aws_security_group" "focusflow_sg" {
-  name        = "focusflow-sg"
-  description = "Allow SSH and HTTP for FocusFlow Pomodoro app"
+# ---------------------------------------------------------
+# Artifact Registry
+# ---------------------------------------------------------
 
-  ingress {
-    description = "SSH"
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"] # tighten to your IP for real use
-  }
-
-  ingress {
-    description = "HTTP"
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = {
-    Name = "focusflow-sg"
-  }
+resource "google_artifact_registry_repository" "focusflow" {
+  location      = var.gcp_region
+  repository_id = "focusflow"
+  description   = "FocusFlow Docker images"
+  format        = "DOCKER"
 }
 
-resource "aws_instance" "focusflow_server" {
-  ami                    = var.ami_id
-  instance_type          = var.instance_type
-  key_name               = var.key_name
-  vpc_security_group_ids = [aws_security_group.focusflow_sg.id]
+# ---------------------------------------------------------
+# GKE Autopilot Cluster
+# ---------------------------------------------------------
 
-  root_block_device {
-    volume_size = 12 # a bit more room than default: node_modules + docker images
-    volume_type = "gp3"
-  }
+resource "google_container_cluster" "focusflow" {
+  name     = var.gke_cluster_name
+  location = var.gcp_region
 
-  tags = {
-    Name = "focusflow-pomodoro-server"
-  }
-}
+  enable_autopilot = true
 
-output "instance_public_ip" {
-  value = aws_instance.focusflow_server.public_ip
+  deletion_protection = true
 }
