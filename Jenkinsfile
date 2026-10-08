@@ -2,8 +2,13 @@ pipeline {
     agent any
 
     environment {
-        BACKEND_IMAGE = 'focusflow-backend'
-        FRONTEND_IMAGE = 'focusflow-frontend'
+        PROJECT_ID = 'focus-flow-508619'
+        REGION = 'us-central1'
+        REGISTRY = 'us-central1-docker.pkg.dev'
+        REPOSITORY = 'focusflow'
+
+        BACKEND_IMAGE = "${REGISTRY}/${PROJECT_ID}/${REPOSITORY}/focusflow-backend"
+        FRONTEND_IMAGE = "${REGISTRY}/${PROJECT_ID}/${REPOSITORY}/focusflow-frontend"
     }
 
     stages {
@@ -17,7 +22,7 @@ pipeline {
 
         stage('Backend Test') {
             steps {
-                echo 'Installing backend dependencies...'
+                echo 'Installing backend dependencies and running tests...'
 
                 dir('backend') {
                     sh 'npm ci'
@@ -35,9 +40,30 @@ pipeline {
             }
         }
 
+        stage('Docker Push') {
+            steps {
+                echo 'Pushing Docker images to Google Artifact Registry...'
+
+                sh '''
+                    TOKEN=$(curl --noproxy "*" -s \
+                    -H "Metadata-Flavor: Google" \
+                    "http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/token" |
+                    python3 -c "import sys,json; print(json.load(sys.stdin)[\\"access_token\\"])")
+
+                    echo "$TOKEN" | docker login \
+                    -u oauth2accesstoken \
+                    --password-stdin \
+                    https://${REGISTRY}
+
+                    docker push ${BACKEND_IMAGE}:latest
+                    docker push ${FRONTEND_IMAGE}:latest
+                '''
+            }
+        }
+
         stage('Docker Verify') {
             steps {
-                echo 'Verifying Docker images...'
+                echo 'Verifying pushed Docker images...'
 
                 sh 'docker images ${BACKEND_IMAGE}'
                 sh 'docker images ${FRONTEND_IMAGE}'
@@ -47,11 +73,11 @@ pipeline {
 
     post {
         success {
-            echo 'FocusFlow CI pipeline completed successfully!'
+            echo 'FocusFlow CI/CD image pipeline completed successfully!'
         }
 
         failure {
-            echo 'FocusFlow CI pipeline failed. Check the Jenkins console output.'
+            echo 'FocusFlow pipeline failed. Check the Jenkins console output.'
         }
     }
 }
